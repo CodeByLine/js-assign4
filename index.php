@@ -5,10 +5,10 @@
     require_once "util.php";
     require_once "head.php";
 
-    // if(!isset($_SESSION)) 
-    // { 
+    if(!isset($_SESSION)) 
+    { 
         session_start(); 
-    // } 
+    } 
 
     if (!empty($_SESSION['message'])) {
         echo($_SESSION['message']);
@@ -92,24 +92,25 @@
 </style>
 
 <div class="container">
-    <h1> Yumei Leventhal Resume Registry</h1>
-    <a href="login.php">Please log in</a>
+    <h1> Yumei Leventhal Resume Registry</h1><br>
+    <a href="login.php">Please log in</a> if not logged in already.
 <br>
-   
-
-
-
 <br>
- <br>
+<br>
+<br>
+            <h3>This Be The Verse</h3><br>
+            <p><em>By Philip Larkin</em></p>
+            <p>They fuck you up, your mum and dad.<br>
+            They may not mean to, but they do. <br>
+            They fill you with the faults they had<br>
+            And add some extra, just for you.</p>
 
-            <p>'My name is Ozymandias, king of kings;</p>
-            <p>Look on my works, ye Mighty, and despair!</p>
-            <p>Nothing beside remains. Round the decay</p>
-            <p>Of that colossal wreck, boundless and bare</p>
-            <p>The lone and level sands stretch far away.</p>
-            <!-- <a href="add.php">Add New Entry</a> -->
-    <br>
-    <a href="add.php">Add New Entry</a>
+            <p>* Read the rest of this delightful poem at <a href="https://www.poetryfoundation.org/poems/48419/this-be-the-verse">The Poetry Foundation</a></p>
+
+
+            <br>
+            <a href="add.php" style="color: red">Add New Entry</a>
+
     </div>  
 </body>
 </html>

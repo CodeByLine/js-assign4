@@ -38,13 +38,13 @@
     echo "<h1>" . "Profile information for " . htmlentities($row['first_name']) . "</h1>";
     // echo "<h2>" . $txt1 . "</h2>";
     echo "<br>";
-    echo "<p>" . "First Name: " . $row['first_name'] . "</p>";
+    echo "<p><strong>" . "First Name: </strong>" . $row['first_name'] . "</p>";
     // echo ("\n");
-    echo "<p>" . "Last Name: " . $row['last_name']."</p>";
+    echo "<p><strong>" . "Last Name: </strong>" . $row['last_name']."</p>";
     // var_dump($row);
-    echo "<p>" . "Email: " . $row['email'] . "</p>";
-    echo "<p>" . "Headline: " . $row['headline'] . "</p>";
-    echo "<p>" . "Summary: " . $row['summary'] . "</p>";
+    echo "<p><strong>" . "Email: </strong>" . $row['email'] . "</p>";
+    echo "<p><strong>" . "Headline: </strong>" . $row['headline'] . "</p>";
+    echo "<p><strong>" . "Summary: </strong>" . $row['summary'] . "</p>";
     
 
 
@@ -56,16 +56,16 @@
       ':xyz' => $profile_id));   // $_GET['profile_id']));
     // $position = $stmt->fetch(PDO::FETCH_ASSOC);
     while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    echo "<p>";
-    echo ("Positions: ");
+    echo "<p><strong>";
+    echo ("Positions: </strong>");
    
     // var_dump($position); 
 
-    echo "<p>" . "Positions: " . "</p>";
+    // echo "<p>" . "Positions: " . "</p>";
    
     echo ($position['year']. "\n");
-    echo "</p>";
-    echo ("Description: ");
+    echo "</p><strong>";
+    echo ("Description: </strong>");
     echo ($position['description']);
     // echo ('<li>'."&nbsp;&nbsp; &nbsp; $position['year']".'</li>');
     // echo ('<li>'."&nbsp;&nbsp; &nbsp; $position['description']".'</li>');
