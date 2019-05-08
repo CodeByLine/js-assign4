@@ -88,7 +88,8 @@
 //  $edrow = $stmt->fetch(PDO::FETCH_ASSOC); 
     while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC)) {
         echo "<p><strong>";
-        echo ("Education: </strong>");
+        echo ("Education: </strong></p>");
+        echo ("<strong>Institution_ID: </strong>");
         echo ($education['institution_id']);
         echo "</p><strong>";
         echo ("Year: </strong>");
