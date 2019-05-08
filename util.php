@@ -85,13 +85,32 @@ function loadPos($pdo, $profile_id) {
     }
     return $positions;
     }
-    
-    // if ($row === false  ){
-    //     $_SESSION['error'] = "Could not load position";
-    //     header('Location: index.php');
-    //     return;
-    // }
- 
+
+
+
+function insertPos( $pdo, $profile_id) {
+    $rank = 1;
+    for($i=1; $i<=9; $i++) {
+      if ( ! isset($_POST['year'.$i]) ) continue;
+      if ( ! isset($_POST['desc'.$i]) ) continue;
+      $year = $_POST['year'.$i];
+      $desc = $_POST['desc'.$i];
+
+      $stmt = $pdo->prepare('INSERT INTO Position (profile_id, rank, year, description) VALUES ( :pid, :rank, :year, :desc)');
+
+      $stmt->execute(array(
+        ':pid' => $profile_id, 
+        // ':pid' => $_REQUEST['profile_id'],  //$profile_id: foreign key
+// new add
+        ':rank' => $rank,
+        ':year' => $year,
+        ':desc' => $desc)
+      );
+    $rank++;
+     }
+     return true;
+}
+
 
 // function doValidate() {
 //         console.log('Validating...');
@@ -106,9 +125,7 @@ function loadPos($pdo, $profile_id) {
 //           return false;
 //         }  
 //           return true;
-
 //       } catch(e) {
-
 //         return false;   
 //       }
 //         return false;
@@ -119,9 +136,7 @@ function loadPos($pdo, $profile_id) {
 // <script>
 //   function addPos() {
 //     var div = document.createElement('div');
-
 //     div.className = 'row';
-
 //     div.innerHTML =
 //         '<input type="text" name="position" value="" />\
 //         <input type="text" name="value" value="" />\
@@ -135,7 +150,6 @@ function loadPos($pdo, $profile_id) {
 //         document.getElementById('pos').removeChild(input.parentNode);
 //     }
 //     </script>
-
 
 // <script>
 // function validatePos() {
@@ -153,31 +167,15 @@ function loadPos($pdo, $profile_id) {
 //     countPos++;
 //     window.console && console.log("Adding position "+countPos);
 //     $('#position_fields').append(
-
 //       <div id="position'+countPos+'"> \ 
 //       <p>year: <input type="text" name="year'+countPos+'" value=" /> \ 
 //       <input type="button" value="-" \ 
 //             onclick="$(\'#position'+countPos+'\').remove();return false;"></p> \ 
 //             <textarea name="desc'+countPos+'" rows="8" cols="80"></textarea>\
 //             </div>');
- 
 //   });
 // }
-
 // </script>
-
-// Load up the profile in question
-// function loadProfile() { 
-//   $stmt = $pdo->prepare('SELECT * FROM Profile
-//       WHERE profile_id = :prof AND user_id = :uid');
-//   $stmt->execute(array( ':prof' => $_REQUEST['profile_id'],
-//   ':uid' => $_SESSION['user_id']));
-//   $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-//   if ( $profile === false ) {
-//     $_SESSION['error'] = "Could not load profile";
-//     header('Location: index.php');
-//     return;
-// }
 
 
 // NO closing PHP bracket "? >": 

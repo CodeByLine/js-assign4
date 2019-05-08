@@ -78,26 +78,68 @@
       );
     $profile_id = $pdo->lastInsertId();
 
-//Insert the position entries
+
+/////////////////// BEGIN insert school 
+
     $rank = 1;
     for($i=1; $i<=9; $i++) {
       if ( ! isset($_POST['year'.$i]) ) continue;
-      if ( ! isset($_POST['desc'.$i]) ) continue;
+      if ( ! isset($_POST['school'.$i]) ) continue;
       $year = $_POST['year'.$i];
-      $desc = $_POST['desc'.$i];
+      $inst = $_POST['school'.$i];
 
-      $stmt = $pdo->prepare('INSERT INTO Position (profile_id, rank, year, description) VALUES ( :pid, :rank, :year, :desc)');
+      $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
+      $stmt->execute(array( ':prefix' => $_REQUEST['term']."%"));
+      $retval = array();
+      while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
+      $retval[] = $row['name'];
+          }
+      echo(json_encode($retval, JSON_PRETTY_PRINT));
 
-      $stmt->execute(array(
-        ':pid' => $profile_id, 
-        // ':pid' => $_REQUEST['profile_id'],  //$profile_id: foreign key
-// new add
-        ':rank' => $rank,
-        ':year' => $year,
-        ':desc' => $desc)
-      );
-    $rank++;
-     }
+    //  $stmt = $pdo->prepare('INSERT INTO Education (profile_id, rank, year, institution_id) VALUES ( :pid, :rank, :year, :inst_id)');
+
+    //   $stmt->execute(array(
+    //     ':pid' => $profile_id, 
+    // //$profile_id: foreign key
+    //     ':rank' => $rank,
+    //     ':year' => $year,
+    //     ':inst_id' => $_REQUEST['institution_id'])
+    //   );
+    // $rank++;
+    //  }
+
+    }
+/////////////// END inser education
+
+
+//Insert the position entries
+    $msg = insertPos($pdo, $_REQUEST['profile_id']);
+    if (is_string($msg)) {
+      $_SESSION['error'] = $msg;
+      header("Location: add.php");
+      return;
+    }
+
+//Insert the position entries
+//     $rank = 1;
+//     for($i=1; $i<=9; $i++) {
+//       if ( ! isset($_POST['year'.$i]) ) continue;
+//       if ( ! isset($_POST['desc'.$i]) ) continue;
+//       $year = $_POST['year'.$i];
+//       $desc = $_POST['desc'.$i];
+
+//       $stmt = $pdo->prepare('INSERT INTO Position (profile_id, rank, year, description) VALUES ( :pid, :rank, :year, :desc)');
+
+//       $stmt->execute(array(
+//         ':pid' => $profile_id, 
+//         // ':pid' => $_REQUEST['profile_id'],  //$profile_id: foreign key
+// // new add
+//         ':rank' => $rank,
+//         ':year' => $year,
+//         ':desc' => $desc)
+//       );
+//     $rank++;
+//      }
     
     $_SESSION['success'] = "<p style = 'color:green'>Profile added.</ p>\n";
     $_SESSION['message'] = "<p style = 'color:green'>Profile added.</ p>\n";
@@ -157,6 +199,11 @@
       <p>Summary:<br/>
       <textarea name="summary" rows="8" cols="80"></textarea></p>
 
+      <p>Education: <input type="submit" id="addEd" value="+">
+      <div id="education_fields">
+      </div>
+
+
       <p>Position: <input type="submit" id="addPos" value="+">
       <div id="position_fields">
       </div>
@@ -167,6 +214,34 @@
       </p>
 
     </form>
+
+    <script>
+        countEds = 0;
+// http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
+    $(document).ready(function () {
+      window.console && console.log('Document ready called');
+      $('#addEd').click(function(event) {          
+        //look up #addPos, then register an event
+// http://api.jquery.com/event.preventdefault/
+        event.preventDefault();                         // similar to "return false"
+        if ( countEds >= 9) {
+          alert("Maximum of nine institution entries exceeded");
+          return;
+        }
+
+        countEds++;
+        window.console && console.log("Adding institutions " + countEds);
+          //adding html code // one long string concatenation
+            $('#education_fields').append(        
+              '<div id="edution' + countEds + '"> \
+              <p>Year: <input type="text" name="year' + countEds + '" value="" /> \
+              <input type="button" value="-" \
+              onclick="$(\'#education' + countEds + '\').remove();return false;"></p> <p>School: <input type="text" size="80" name="edu_school1" class="school ui-autocomplete-input" value="" autocomplete="off">\
+              </p></div>');
+            });
+          });
+          
+  </script>
 
   <script>
 
@@ -189,8 +264,8 @@
         <p>Year: <input type="text" name="year' + countPos + '" value="" /> \
         <input type="button" value="-" \
             onclick="$(\'#position' + countPos + '\').remove();return false;"></p> \
-        <textarea name="desc' + countPos + '" rows="8" cols="80"></textarea>\
-        </div>');
+        <p>Description: <textarea name="desc' + countPos + '" rows="8" cols="80"></textarea>\
+        </p></div>');
         });
     });
   
