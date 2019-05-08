@@ -28,13 +28,8 @@
 
         echo('<table class="table table-striped" border="1" >'."\n");
 
-        // profile_id, user_id, first_name, last_name, email, headline, summary
-
-        $sql = ("SELECT * FROM Profile"); // WHERE profile_id = :pd, user_id = :ud, first_name = :fn, last_name = :ln, email = :em, headline = :he, summary = :su");
+        $sql = ("SELECT * FROM Profile"); 
         $stmt = $pdo->query($sql);
-        // $stmt->execute(array(
-
-        // ));
 
         echo "<tr><th>Profile Id</th><th>User Id</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Headline</th> <th>Summary</th> <th>Action</th><th>View</th>";
 
@@ -64,7 +59,6 @@
         echo '<p></p>';
     }
 }
-
     ?>
     <!-- END: View one -->
 
