@@ -95,10 +95,25 @@
 
     // echo ($_POST['headline']);
 
-// Clear out the old position entries--replace, instead of edit     
-    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
+
+///// Clear out the old education entries--replace, instead of edit     
+    // $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
+    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+
+///// Clear out the old position entries--replace, instead of edit     
+    // $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+
+
+
+//Insert education
+    $msg = insertEds($pdo, $_REQUEST['profile_id']);
+    if (is_string($msg)) {
+      $_SESSION['error'] = $msg;
+      header("Location: add.php");
+      return;
+    }
 
 //Insert the position entries
     $msg = insertPos($pdo, $_REQUEST['profile_id']);
@@ -133,7 +148,6 @@
         return;
     }
 
-
     
     $stmt = $pdo->prepare("SELECT * FROM Profile where profile_id = :xyz");
     $stmt->execute(array(":xyz" => $_REQUEST['profile_id']));
@@ -150,13 +164,44 @@
     $stmt->execute(array(":xyz" => $_GET['profile_id']));
     $positions = $stmt->fetchAll();  //row
     if ($positions === false) {
-        $_SESSION['error'] = 'Bad value for user_id';
+        $_SESSION['error'] = 'Bad value for user_id in Position';
         header('Location: index.php');
         return;
     }
 // Load up the position rows to be used for the other pages
-$positions = loadPos($pdo, $_REQUEST['profile_id']);
-        
+    $positions = loadPos($pdo, $_REQUEST['profile_id']);
+
+    // Education
+ 
+// Load up the education rows to be used for the other pages
+
+    // var_dump($education);
+    // $education = loadEds($pdo, $profile_id);
+    // $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
+    // $stmt ->execute(array(':prof' => $profile_id ));
+    // $positions = $stmt->fetchAll$positions;
+    // $education = array();
+    // $row = $stmt->fetch(PDO::FETCH_ASSOC); 
+    // while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC))  {
+    //     $education[] = $row;
+    // }
+    // return $education;
+    
+    $stmt = $pdo->prepare("SELECT * FROM Education where profile_id = :xyz");
+    $stmt->execute(array(":xyz" => $_GET['profile_id']));
+    $education = $stmt->fetchAll();
+ 
+    
+    // while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC)) {
+    //     $inst = $education['institution_id'];
+    //     $edyear = $education['year'];
+    // }
+
+    // if ($education === false) {
+    //     $_SESSION['error'] = 'Bad value for user_id in Education';
+    //     header('Location: index.php');
+    //     return;
+    // }
 
 ?>
 
@@ -202,6 +247,27 @@ $positions = loadPos($pdo, $_REQUEST['profile_id']);
         <p>Summary:<br/>
             <textarea name="summary" rows="8" cols="80"><?= $row['summary'] ?></textarea>
         </p> 
+<!--Begin-Ed  -->
+        <p>  Education: <input type="submit" id="addEds" value="+">
+            <div id="eds_fields">
+            <?php
+                $rank = 1;
+                foreach ($education as $education) {
+
+                    // var_dump ($education);
+
+                    echo "<div id=\"eds" . $rank . "\">
+        <p>Year: <input type=\"text\" name=\"year1\" value=\"".$education['year']."\">
+        <input type=\"button\" value=\"-\" onclick=\"$('#education". $rank ."').remove();return false;\"></p>
+        <text name=\"school". $rank ."\"').\" rows=\"1\" cols=\"80\">".$education['institution_id']."</text>
+        </div>";
+        $rank++;
+        } ?>
+   </div>
+        
+
+
+<!--End-Ed  -->
         <p>  Position: <input type="submit" id="addPos" value="+">
         <div id="position_fields">
             <?php
@@ -221,6 +287,34 @@ $positions = loadPos($pdo, $_REQUEST['profile_id']);
         <input type="submit" name="cancel" value="Cancel">
         </p>
     </form>
+
+    <script>
+        countEds = 0;
+        // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
+            $(document).ready(function () {
+            window.console && console.log('Document ready called');
+            $('#addEd').click(function(event) {          
+                //look up #addPos, then register an event
+        // http://api.jquery.com/event.preventdefault/
+                event.preventDefault();                         // similar to "return false"
+                if ( countEds >= 9) {
+                alert("Maximum of nine institution entries exceeded");
+                return;
+                }
+
+                countEds++;
+                window.console && console.log("Adding institutions " + countEds);
+                //adding html code // one long string concatenation
+                    $('#education_fields').append(        
+                    '<div id="edution' + countEds + '"> \
+                    <p>Year: <input type="text" name="year' + countEds + '" value="" /> \
+                    <input type="button" value="-" \
+                    onclick="$(\'#education' + countEds + '\').remove();return false;"></p> <p>School: <input type="text" size="80" name="edu_school1" class="school ui-autocomplete-input" value="" autocomplete="on">\
+                    </p></div>');
+                    });
+                });
+                
+        </script>
 
         <script>
             countPos = 0;

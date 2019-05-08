@@ -70,7 +70,33 @@
     // echo ('<li>'."&nbsp;&nbsp; &nbsp; $position['year']".'</li>');
     // echo ('<li>'."&nbsp;&nbsp; &nbsp; $position['description']".'</li>');
 }
+ ////
+    $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
+    $stmt ->execute(array(':prof' => $profile_id ));
+    // $education = array();
+    // $education = $stmt->fetch     (PDO::FETCH_ASSOC);
+    // $edrow = $stmt->fetch      (PDO::FETCH_ASSOC);
+    // var_dump($education);
+    // var_dump($edrow);
+    // echo($education['institution_id']);
+    // echo "##";
+   
+    // foreach ($education as $edrow) {
+    //     echo('<li>'.$education['year'].':'.$education['institution_id'].'</li>');
+    // }
+   
+//  $edrow = $stmt->fetch(PDO::FETCH_ASSOC); 
+    while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC)) {
+        echo "<p><strong>";
+        echo ("Education: </strong>");
+        echo ($education['institution_id']);
+        echo "</p><strong>";
+        echo ("Year: </strong>");
+        echo ($education['year']. "\n");
+
+    }
     
+////// BEGIN: View All
 
     $stmt = $pdo->query("SELECT * FROM Profile");
     echo('<table class="table table-striped" border="1" >'."\n");
@@ -139,9 +165,10 @@
         <a href="index.php">Back to Index</a>
         <br><br>
         
-        <?php
+
             
-            // Flash pattern
+        <?php
+               // Flash pattern
             if ( isset($_SESSION['error']) ) {
               echo '<p style="color:red">'.$_SESSION['error']."</p>\n";
               unset($_SESSION['error']);

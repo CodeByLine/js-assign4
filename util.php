@@ -53,14 +53,10 @@ function validatePos() {
         $year = $_POST['year'.$i];
         $desc = $_POST['desc'.$i];
         if ( strlen($year) == 0 || strlen($desc) == 0 ) {
-            // $_SESSION['message'] = "<p style = 'color:red'>All fields are requred.</p>\n";
-            // $_SESSION['error'] = "<p style = 'color:red'>All fields are requred.</p>\n";
             return "All fields are requred";
         }
 
         if ( ! is_numeric($year)) {
-            // $_SESSION['message'] = "<p style = 'color:red'>Position year must be numeric.</p>\n";
-            // $_SESSION['error'] = "<p style = 'color:red'>Position year must be numeric.</p>\n";
             return "Position year must be numeric";
         }
     }
@@ -112,6 +108,81 @@ function insertPos( $pdo, $profile_id) {
 }
 
 
+/////////////////// BEGIN insert school 
+
+function insertEds($pdo, $profile_id) { 
+    $rank = 1;
+    for($i=1; $i<=9; $i++) {
+    if ( ! isset($_POST['edyear'.$i]) ) continue;
+    if ( ! isset($_POST['school'.$i]) ) continue;
+    $edyear = $_POST['edyear'.$i];
+    $school = $_POST['school'.$i];
+
+    // $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
+    // $stmt->execute(array( ':prefix' => $_REQUEST['institution_id']."%"));
+    // $stmt->execute(array(":xyz" => $school));
+    $stmt = $pdo->prepare("SELECT * FROM Institution where name = :xyz");
+            $stmt->execute(array(":xyz" => $school));
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $institution_id = $row['institution_id'];
+    } else {
+        $stmt = $pdo->prepare('INSERT INTO Institution (name) VALUES ( :name)');
+        $stmt->execute(array(
+            ':name' => $school,
+        ));
+        $institution_id = $pdo->lastInsertId();
+    }
+    $stmt = $pdo->prepare('INSERT INTO Education
+(profile_id, institution_id, year, rank)
+VALUES ( :pid, :institution, :edyear, :rank)');
+    $stmt->execute(array(
+            ':pid' => $profile_id,
+            ':institution' => $institution_id,
+            ':edyear' => $edyear,
+            ':rank' => $rank)
+    );
+    $rank++;
+}
+
+function validateEds() {
+    for($i=1; $i<=9; $i++) {
+        if ( ! isset($_POST['edyear'.$i])) continue;
+        if ( ! isset($_POST['school'.$i])) continue;
+        $year = $_POST['edyear'.$i];
+        $school = $_POST['school'.$i];
+        if ( strlen($edyear) == 0 || strlen($school) == 0 ) {
+            return "All fields are requred";
+        }
+
+            return "Year must be numeric";
+        }
+    
+    return true;
+}
+
+
+
+    // $retval = array();
+    // while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
+    //     $retval[name] = $row['name'];
+    //     }
+    // echo(json_encode($retval, JSON_PRETTY_PRINT));
+    //     }
+    // }
+
+function loadEds($pdo, $profile_id) {      
+    $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
+    $stmt ->execute(array(':prof' => $profile_id ));
+    // $positions = $stmt->fetchAll$positions;
+    $education = array();
+    // $row = $stmt->fetch(PDO::FETCH_ASSOC); 
+    while  ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $education[] = $row;
+    }
+    return $education;
+    }
+}
 // function doValidate() {
 //         console.log('Validating...');
   
