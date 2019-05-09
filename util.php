@@ -1,5 +1,5 @@
 <?php
-// util.php
+// TO use: require_once "util.php";
     require_once "pdo.php";
     // session_start();
 
@@ -7,8 +7,6 @@
     { 
         session_start(); 
     } 
-// TO use:
-// require_once "util.php";
 
 function flashMessages() {          
     
@@ -82,8 +80,6 @@ function loadPos($pdo, $profile_id) {
     return $positions;
     }
 
-
-
 function insertPos( $pdo, $profile_id) {
     $rank = 1;
     for($i=1; $i<=9; $i++) {
@@ -107,9 +103,7 @@ function insertPos( $pdo, $profile_id) {
      return true;
 }
 
-
 /////////////////// BEGIN insert school 
-
 function insertEds($pdo, $profile_id) { 
     $rank = 1;
     for($i=1; $i<=9; $i++) {
@@ -118,9 +112,17 @@ function insertEds($pdo, $profile_id) {
     $edyear = $_POST['edyear'.$i];
     $school = $_POST['school'.$i];
 
-    // $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
-    // $stmt->execute(array( ':prefix' => $_REQUEST['institution_id']."%"));
+    $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
+    $stmt->execute(array( ':prefix' => $_REQUEST['institution_id']."%"));
     // $stmt->execute(array(":xyz" => $school));
+    $retval = array();
+    while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
+      $retval[] = $row['name'];
+    }
+    
+    echo(json_encode($retval, JSON_PRETTY_PRINT));
+
+
     $stmt = $pdo->prepare("SELECT * FROM Institution where name = :xyz");
             $stmt->execute(array(":xyz" => $school));
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -154,14 +156,11 @@ function validateEds() {
         if ( strlen($edyear) == 0 || strlen($school) == 0 ) {
             return "All fields are requred";
         }
-
-            return "Year must be numeric";
+        if ( ! is_numeric($edyear)) {
+            return "Position year must be numeric";
         }
-    
     return true;
 }
-
-
 
     // $retval = array();
     // while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
@@ -182,6 +181,7 @@ function loadEds($pdo, $profile_id) {
     }
     return $education;
     }
+}
 }
 // function doValidate() {
 //         console.log('Validating...');

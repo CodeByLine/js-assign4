@@ -38,23 +38,6 @@
 
         // Data validation code: moved to util.php
 
-// Validate position entries if present
-// If a string is returned, then it's an error.
-
-      $msg = validatePos();
-      if (is_string($msg)) {
-        $_SESSION['error'] = $msg;
-        header("Location: add.php");
-        return;
-      }
-
-      
-      // $msgE = validateEds();
-      // if (is_string($msgE)) {
-      //   $_SESSION['error'] = $msgE;
-      //   header("Location: add.php");
-      //   return;
-      // }
 
     if ( strlen($_POST['first_name']) < 1 || strlen($_POST['last_name']) < 1 || strlen($_POST['email']) < 1 || strlen($_POST['headline']) < 1 || strlen($_POST['summary']) < 1) {
 
@@ -91,34 +74,74 @@
 
 
 /////////////////// BEGIN insert school 
+for($i=1; $i<=9; $i++) {
+  if ( ! isset($_POST['edyear'.$i])) continue;
+  if ( ! isset($_POST['school'.$i])) continue;
+  $year = $_POST['edyear'.$i];
+  $school = $_POST['school'.$i];
+  if ( strlen($year) == 0 || strlen($school) == 0 ) {
+      return "All fields are requred";
+  }
+  if ( ! is_numeric($year)) {
+      $_SESSION['message'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+      $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+      header("Location: add.php");
+      return;
+  }
+return true;
+}
+  
 
-    // $rank = 1;
-    // for($i=1; $i<=9; $i++) {
-    //   if ( ! isset($_POST['year'.$i]) ) continue;
-    //   if ( ! isset($_POST['school'.$i]) ) continue;
-    //   $year = $_POST['year'.$i];
-    //   $inst = $_POST['school'.$i];
+      // Validate position entries if present
+// If a string is returned, then it's an error.
+   
+      $msg = validatePos();
+      if (is_string($msg)) {
+        $_SESSION['error'] = $msg;
+        header("Location: add.php");
+        return;
+      }
 
-    //   $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
-    //   $stmt->execute(array( ':prefix' => $_REQUEST['term']."%"));
-    //   $retval = array();
-    //   while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
-    //   $retval[] = $row['name'];
-    //       }
-    //   echo(json_encode($retval, JSON_PRETTY_PRINT));
-    //     }
 
-    //  $stmt = $pdo->prepare('INSERT INTO Education (profile_id, rank, year, institution_id) VALUES ( :pid, :rank, :year, :inst_id)');
+      // $    $msg = validateEds();    //Doesn't work!!!
+      // if (is_string($msg)) {
+      //     $_SESSION['error'] = $msg;
+      //     header("Location: add.php");
+      // }
 
-    //   $stmt->execute(array(
-    //     ':pid' => $profile_id, 
-    // //$profile_id: foreign key
-    //     ':rank' => $rank,
-    //     ':year' => $year,
-    //     ':inst_id' => $_REQUEST['institution_id'])
-    //   );
-    // $rank++;
-    //  }
+    $rank = 1;
+    for($i=1; $i<=9; $i++) {
+      if ( ! isset($_POST['year'.$i]) ) continue;
+      if ( ! isset($_POST['school'.$i]) ) continue;
+      $year = $_POST['year'.$i];
+      $school = $_POST['school'.$i];
+
+      if ( ! is_numeric($year)) {
+        $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+        $_SESSION['message'] = "<p style = 'color:red'>Year must be numeric</p>\n";
+      }
+      }
+
+      $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
+      $stmt->execute(array( ':prefix' => $_REQUEST['school']."%"));
+      $retval = array();
+      while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
+      $retval[] = $row['name'];
+          }
+      echo(json_encode($retval, JSON_PRETTY_PRINT));
+        // }
+
+     $stmt = $pdo->prepare('INSERT INTO Education (profile_id, rank, year, institution_id) VALUES ( :pid, :rank, :year, :inst_id)');
+
+      $stmt->execute(array(
+        ':pid' => $profile_id, 
+    //$profile_id: foreign key
+        ':rank' => $rank,
+        ':year' => $year,
+        ':inst_id' => $_REQUEST['institution_id'])
+      );
+      $rank++;
+     
 
     $msg = insertEds($pdo, $profile_id);
     if (is_string($msg)) {
@@ -216,7 +239,7 @@
       <p>Summary:<br/>
       <textarea name="summary" rows="8" cols="80"></textarea></p>
 
-      <p>Education: <input type="submit" id="addEds" value="+">
+      <p>Education: <input type="submit" id="addEds" value="+" autocomplete="on">
       <div id="eds_fields">
       </div>
 
@@ -234,7 +257,8 @@
 
     <script>
         countEds = 0;
-        http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
+        countPos = 0;
+        // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
             $(document).ready(function () {
               window.console && console.log('Document ready called');
             $('#addEds').click(function (event) {
@@ -249,7 +273,7 @@
                     '<div id="eds' + countEds + '"> \
             <p>Year: <input type="text" name="edyear' + countEds + '" value="" /> \
             <input type="button" value="-" onclick="$(\'#eds' + countEds + '\').remove();return false;"><br>\
-            <p>School: <input type="text" size="80" name="school' + countEds + '" class="school" value="" />\
+            <p>School: <input type="text" size="80" id="school" name="school' + countEds + '" class="school" value=""/>\
             </p></div>'
                 );
                 $('.school').autocomplete({
@@ -257,46 +281,11 @@
                 });
             });
 
-            });
 
-        // countEds = 0;
+            // countPos = 0;
 // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
     // $(document).ready(function () {
     //   window.console && console.log('Document ready called');
-
-            
-// http://api.jquery.com/event.preventdefault/
-        // event.preventDefault();                         
-        // if ( countEds >= 9) {
-        //   alert("Maximum of nine institution entries exceeded");
-        //   return;
-        // }
-        
-        // $('#addEds').click(function(event) {   
-
-        //   $('.school').autocomplete({ source: "school.php" }); 
-        // }
-
-        // countEds++;
-        // window.console && console.log("Adding institutions " + countEds);
-        //   //adding html code // one long string concatenation
-        //     $('#education_fields').append(
-        //       '<div id="edu' + countEds + '"> \ <p>Year: <input type="text" name="edyear' + countEds + '" value="" /> \ <input type="button" value="-" \  onclick="$(\'#education' + countEds + '\').remove(); return false;"></p> \
-        //        <p>School: <input type="text" name="school' + countEds + '" value="" /> \
-        //       </p></div>');
-              
-
-        //     });
-        //   });
-  </script>
-  
-
-  <script>
-
-    countPos = 0;
-// http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
-    $(document).ready(function () {
-      window.console && console.log('Document ready called');
       $('#addPos').click(function(event) {                //look up #addPos, then register an event
 // http://api.jquery.com/event.preventdefault/
         event.preventDefault();                         // similar to "return false"
@@ -315,8 +304,8 @@
         <p>Description: <textarea name="desc' + countPos + '" rows="8" cols="80"></textarea>\
         </p></div>');
         });
-    });
-  
+  });
+    
   </script>
 
 </div>

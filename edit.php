@@ -52,6 +52,7 @@
         header('Location: index.php');
         return;
         }
+    
 
 // Chuck: Handle the incoming data
 
@@ -75,6 +76,32 @@
         return;
     }
 
+
+    // $msg = validateEds();
+    // if ( is_string($msg)) {
+    //     $_SESSION['error'] = $msg;
+    //     header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);
+    //     return;
+    // }
+    for($i=1; $i<=9; $i++) {
+        if ( ! isset($_POST['year'.$i])) continue;
+        if ( ! isset($_POST['school'.$i])) continue;
+        $year = $_POST['year'.$i];
+        $school = $_POST['school'.$i];
+        if ( strlen($year) == 0 || strlen($school) == 0 ) {
+            return "All fields are requred";
+        }
+        if ( ! is_numeric($year)) {
+            $_SESSION['message'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+            $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+            header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);
+            return;
+        }
+    return true;
+    }
+
+
+
     $stmt = $pdo->prepare('UPDATE Profile SET first_name = :fn, 
         last_name = :ln,email=:em, headline=:he, summary=:su
         WHERE profile_id = :pid AND user_id=:uid');
@@ -90,20 +117,17 @@
     $_SESSION['success'] = 'Record updated';
     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
 
-        // var_dump($_REQUEST['profile_id']);
-        // var_dump($_REQUEST['user_id']);
-
+    // var_dump($_REQUEST['profile_id']);
+    // var_dump($_REQUEST['user_id']);
     // echo ($_POST['headline']);
 
+// /// Clear out the old education entries--replace, instead of edit     
+    $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
+    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
-
-///// Clear out the old education entries--replace, instead of edit     
-    // $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
-    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
-
-///// Clear out the old position entries--replace, instead of edit     
-    // $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+// /// Clear out the old position entries--replace, instead of edit     
+    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 
 
@@ -186,16 +210,13 @@
     //     $education[] = $row;
     // }
     // return $education;
-    
-    $stmt = $pdo->prepare("SELECT * FROM Education where profile_id = :xyz");
-    $stmt->execute(array(":xyz" => $_GET['profile_id']));
-    $education = $stmt->fetchAll();
- 
-    
-    // while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC)) {
-    //     $inst = $education['institution_id'];
-    //     $edyear = $education['year'];
-    // }
+
+    $stmt = $pdo->prepare("SELECT * FROM Education join Institution on Education.institution_id = Institution.institution_id where profile_id = :prof ORDER BY rank");
+    $stmt->execute(array(":prof" => $_REQUEST["profile_id"]));
+    $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // var_dump($education);
+
 
     // if ($education === false) {
     //     $_SESSION['error'] = 'Bad value for user_id in Education';
@@ -252,33 +273,33 @@
             <div id="eds_fields">
             <?php
                 $rank = 1;
-                foreach ($education as $education) {
+                foreach ((array) $education as $edu) {
 
                     // var_dump ($education);
-
                     echo "<div id=\"eds" . $rank . "\">
-        <p>Year: <input type=\"text\" name=\"year1\" value=\"".$education['year']."\">
-        <input type=\"button\" value=\"-\" onclick=\"$('#education". $rank ."').remove();return false;\"></p>
-        <text name=\"school". $rank ."\"').\" rows=\"1\" cols=\"80\">".$education['institution_id']."</text>
+        <p>Year: <input type=\"text\" name=\"year1\" value=\"".$edu['year']."\">
+        <input type=\"button\" value=\"-\" onclick=\"$('#education". $rank . "').remove();return false;\"></p>
+        <text name=\"school". $rank ."\"').\" rows=\"1\" cols=\"80\">".$edu['name']."</text>
         </div>";
-        $rank++;
+            $rank++;
         } ?>
-   </div>
         
-
-
+   </div></p>
+    
 <!--End-Ed  -->
+
+<!-- Begin-Pos -->
         <p>  Position: <input type="submit" id="addPos" value="+">
         <div id="position_fields">
             <?php
             $rank = 1;
-            foreach ($positions as $row) {
+            foreach ((array) $positions as $row) {
                 echo "<div id=\"position" . $rank . "\">
-  <p>Year: <input type=\"text\" name=\"year1\" value=\"".$row['year']."\">
-  <input type=\"button\" value=\"-\" onclick=\"$('#position". $rank ."').remove();return false;\"></p>
-  <textarea name=\"desc". $rank ."\"').\" rows=\"8\" cols=\"80\">".$row['description']."</textarea>
+        <p>Year: <input type=\"text\" name=\"year1\" value=\"".$row['year']."\">
+        <input type=\"button\" value=\"-\" onclick=\"$('#position" . $rank . "').remove();return false;\"></p>
+        <textarea name=\"desc". $rank ."\"').\" rows=\"8\" cols=\"80\">".$row['description']."</textarea>
 </div>";
-                $rank++;
+            $rank++;
             } ?>
         </div>
         </p>
@@ -290,47 +311,45 @@
 
     <script>
         countEds = 0;
+        countPos = 0;
         // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
             $(document).ready(function () {
-            window.console && console.log('Document ready called');
-            $('#addEd').click(function(event) {          
-                //look up #addPos, then register an event
-        // http://api.jquery.com/event.preventdefault/
-                event.preventDefault();                         // similar to "return false"
-                if ( countEds >= 9) {
-                alert("Maximum of nine institution entries exceeded");
-                return;
+              window.console && console.log('Document ready called');
+            $('#addEds').click(function (event) {
+                event.preventDefault();
+                if (countEds >= 9) {
+                    alert("Maximum of nine education entries exceeded");
+                    return;
                 }
-
                 countEds++;
                 window.console && console.log("Adding institutions " + countEds);
-                //adding html code // one long string concatenation
-                    $('#education_fields').append(        
-                    '<div id="edution' + countEds + '"> \
-                    <p>Year: <input type="text" name="year' + countEds + '" value="" /> \
-                    <input type="button" value="-" \
-                    onclick="$(\'#education' + countEds + '\').remove();return false;"></p> <p>School: <input type="text" size="80" name="edu_school1" class="school ui-autocomplete-input" value="" autocomplete="on">\
-                    </p></div>');
-                    });
+                $('#eds_fields').append(
+                    '<div id="eds' + countEds + '"> \
+            <p>Year: <input type="text" name="edyear' + countEds + '" value="" /> \
+            <input type="button" value="-" onclick="$(\'#eds' + countEds + '\').remove();return false;"><br>\
+            <p>School: <input type="text" size="80" id="school" name="school' + countEds + '" class="school" value=""/>\
+            </p></div>'
+                );
+                $('.school').autocomplete({
+                    source: "school.php"
                 });
+            });
                 
-        </script>
-
-        <script>
-            countPos = 0;
-            // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
-            $(document).ready(function () {
-                window.console && console.log('Document ready called');
-                $('#addPos').click(function (event) {
+            // countPos = 0;
+            // // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
+            // $(document).ready(function () {
+            //     window.console && console.log('Document ready called');
+            $('#addPos').click(function (event) {
                     // http://api.jquery.com/event.preventdefault/
                     event.preventDefault();
                     if (countPos >= 9) {
                         alert("Maximum of nine position entries exceeded");
                         return;
                     }
-                    countPos++;
-                    window.console && console.log("Adding position " + countPos);
-                    $('#position_fields').append(
+
+            countPos++;
+            window.console && console.log("Adding position " + countPos);
+                $('#position_fields').append(
                         '<div id="position' + countPos + '"> \
             <p>Year: <input type="text" name="year' + countPos + '" value="" /> \
             <input type="button" value="-" \
