@@ -39,11 +39,9 @@
          // SECRET? error_log("Did you enter the correct email address?");
               header("Location: login.php");
               return;
-
-              } 
+        } 
         
         if (!$errors) { 
-
             $salt = 'XyZzy12*_';   // for password php123
             $check = hash('md5', $salt.$_POST['pass']);
             $stmt = $pdo->prepare('SELECT user_id, name FROM users
@@ -53,13 +51,12 @@
                     ':pw' => $check));            
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);         
     
-    //////
             if ( $row !== false ) {
 
                 $_SESSION['name'] = $row['name'];
                 $_SESSION['user_id'] = $row['user_id'];
+                $_SESSION['success'] = "<p style = 'color:green'>Login success</ p>\n";
                 $_SESSION['message'] = "<p style = 'color:green'>Login success</ p>\n";
-                $_SESSION['success'] = "<p style = 'color:red'>Login failed.</p>\n";
                 header("Location: index.php");
                 return;
 
@@ -71,11 +68,8 @@
                 header("Location: index.php");
                 return;
             }
-/////
-        }
-            
+        }          
     }
-    
 
 // Fall through into the View
 ?>
@@ -90,16 +84,13 @@
 <title>Yumei Leventhal login.php</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- bootstrap files in head.php -->
-
 <link rel="stylesheet" type="text/css" media="screen" href="main.css">
 
-
-<!-- <script src="main.js"></script> -->
 </head>
 
 <body>
 <div class="container">
-    <h1>Login Page</h1>
+    <!-- <h1>Login Page</h1> -->
     <br>
     <br>
     <h3>
@@ -122,29 +113,9 @@
 
 
     <!-- Moved to util.php -->
-    <!-- <script>
-    function doValidate() {
-            console.log('Validating...');
-            try {
-                addr = document.getElementById('email').value;
-                pw = document.getElementById('id_1723').value;
-                console.log("Validating addr="+addr+" pw="+pw);
-                if ( addr== null || addr =="" || "@" == null || "@" == "" || pw = null || pw == "") {
-                    alert("Both fields must be filled out");
-                    return false;
-                }
-
-                if ( addr.indexOf('@') == -1) {
-                    alert("Invalid emaill address");
-                    return false;
-                }
-                return true;
-            } catch(e) {
-                return false;
-            }
-            return false;
-        }
-    </script>  -->
+   <!-- <script>
+    function doValidate() 
+    </script> -->
 
 </div>
 </body>

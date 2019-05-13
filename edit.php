@@ -31,9 +31,9 @@
 
   $errors = [];
   $success = [];
+
 ///////
 // Make sure the REQUEST parameter is present
-  // if ((!isset($_SESSION['user_id'])) || (!isset($_SESSION['name']))) {
   if ( ! isset($_REQUEST['profile_id']) ) {
     $_SESSION['error'] = "Missing profile_id";
     header('Location: index.php');
@@ -41,21 +41,7 @@
   }
 
 
-  //Chuck: Load up
-    $stmt = $pdo->prepare("SELECT * FROM Profile WHERE profile_id = :prof AND user_id = :uid");
-    $stmt->execute(array(':prof' => $_REQUEST['profile_id'],
-        ':uid' => $_SESSION['user_id']));
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($profile === false) {
-        $_SESSION['error'] = 'Could not load profile';
-        header('Location: index.php');
-        return;
-        }
-    
-
 // Chuck: Handle the incoming data
-
 
   if ( isset($_POST['first_name']) && isset($_POST['last_name'])
     && isset($_POST['email']) && isset($_POST['headline']) && isset($_POST['summary'])) {
@@ -83,12 +69,16 @@
     //     header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);
     //     return;
     // }
+//validate Eds
     for($i=1; $i<=9; $i++) {
         if ( ! isset($_POST['year'.$i])) continue;
         if ( ! isset($_POST['school'.$i])) continue;
         $year = $_POST['year'.$i];
         $school = $_POST['school'.$i];
         if ( strlen($year) == 0 || strlen($school) == 0 ) {
+            $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
+            header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);
+            // return;
             return "All fields are requred";
         }
         if ( ! is_numeric($year)) {
@@ -97,11 +87,12 @@
             header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);
             return;
         }
-    return true;
+    return true; 
     }
 
 
 
+//Update profile
     $stmt = $pdo->prepare('UPDATE Profile SET first_name = :fn, 
         last_name = :ln,email=:em, headline=:he, summary=:su
         WHERE profile_id = :pid AND user_id=:uid');
@@ -113,117 +104,158 @@
         ':em' => $_POST['email'],
         ':he' => $_POST['headline'],
         ':su' => $_POST['summary'] ) );
-            
+
     $_SESSION['success'] = 'Record updated';
     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
-
-    // var_dump($_REQUEST['profile_id']);
-    // var_dump($_REQUEST['user_id']);
-    // echo ($_POST['headline']);
-
-// /// Clear out the old education entries--replace, instead of edit     
-    $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
-    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
-
-// /// Clear out the old position entries--replace, instead of edit     
-    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+    header("Location: view.php");
+    return;
 
 
+// Insert position entries
+    // print_r($profile_id); echo "*******";
+    // echo $_REQUEST['profile_id'];
+    //$msg = insertPos($pdo, $profile_id); //$_REQUEST['profile_id']);
 
-//Insert education
+    // echo "$profile_id";
+    // if (is_string($msg)) {
+
+    //     $_SESSION['error'] = $msg;
+    //     header("Location: edit.php?profile_id=" . $profile_id); // $_REQUEST["profile_id"]); // 
+    //     return "Position error";
+    // } 
+        
+    //     $_SESSION['success'] = 'Record updated';
+    //     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
+    //     header('Location: view.php');
+    //     return;
+    // }
+
+
+    // Insert position entries
+    $rank = 1;
+    for($i=1; $i<=9; $i++) {
+        if ( ! isset($_POST['year'.$i]) ) continue;
+        if ( ! isset($_POST['desc'.$i]) ) continue;
+
+    $year = $_POST['year'.$i];
+    $desc = $_POST['desc'.$i];
+    $stmt = $pdo->prepare('INSERT INTO Position
+        (profile_id, rank, year, description)
+        VALUES ( :pid, :rank, :year, :desc)');
+
+    $stmt->execute(array(
+        ':pid' => $profile_id,
+        ':rank' => $rank,
+        ':year' => $year,
+        ':desc' => $desc)
+    );
+
+    $rank++;
+
+    }
+
+
+    //Insert education
+    $rank = 1;
+    for($i=1; $i<=9; $i++) {
+    if ( ! isset($_POST['year'.$i]) ) continue;
+    if ( ! isset($_POST['school'.$i]) ) continue;
+    $year = $_POST['year'.$i];
+    $school = $_POST['school'.$i];
+
+    $stmt = $pdo->prepare('INSERT INTO Education
+        (profile_id, institution_id, year, rank)
+        VALUES ( :pid, :institution, :year, :rank)');
+    $stmt->execute(array(
+        ':pid' => $profile_id,
+        ':institution' => $institution_id,
+        ':year' => $year,
+        ':rank' => $rank)
+        );
     $msg = insertEds($pdo, $_REQUEST['profile_id']);
     if (is_string($msg)) {
       $_SESSION['error'] = $msg;
       header("Location: add.php");
       return;
+        }
     }
 
-//Insert the position entries
-    $msg = insertPos($pdo, $_REQUEST['profile_id']);
-    if (is_string($msg)) {
-      $_SESSION['error'] = $msg;
-      header("Location: add.php");
-      return;
-    }
 
-//Insert the position entries
-    // $rank = 1;
-    // for ($i = 1; $i <= 9; $i++) {
-    //     if (!isset($_POST['year' . $i])) continue;
-    //     if (!isset($_POST['desc' . $i])) continue;
-    //     $year = $_POST['year' . $i];
-    //     $desc = $_POST['desc' . $i];
-    // $stmt = $pdo->prepare('INSERT INTO Position
-    //         (profile_id, rank, year, description)
-    //     VALUES ( :pid, :rank, :year, :desc)');
-    // $stmt->execute(array(
-    //                 ':pid' => $_GET['profile_id'],
-    //                 ':rank' => $rank,
-    //                 ':year' => $year,
-    //                 ':desc' => $desc)
-    //         );
-    //         $rank++;
-    //     }
-    
-    $_SESSION['success'] = 'Record updated';
-    $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
-        header('Location: index.php');
-        return;
-    }
 
-    
-    $stmt = $pdo->prepare("SELECT * FROM Profile where profile_id = :xyz");
-    $stmt->execute(array(":xyz" => $_REQUEST['profile_id']));
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ( $row === false ) {
-        $_SESSION['error'] = 'Bad value for user_id';
-        header( 'Location: loggedin_index.php' ) ;
-        return;
-    }
-        // print_r($_REQUEST['profile_id']);
-    // echo ($_GET['profile_id']);
-    
-    $stmt = $pdo->prepare("SELECT * FROM Position where profile_id = :xyz");
-    $stmt->execute(array(":xyz" => $_GET['profile_id']));
-    $positions = $stmt->fetchAll();  //row
-    if ($positions === false) {
-        $_SESSION['error'] = 'Bad value for user_id in Position';
-        header('Location: index.php');
-        return;
-    }
-// Load up the position rows to be used for the other pages
-    $positions = loadPos($pdo, $_REQUEST['profile_id']);
+}     /////  The First Major "if" statement//Chuck: Load up
 
-    // Education
- 
-// Load up the education rows to be used for the other pages
 
-    // var_dump($education);
-    // $education = loadEds($pdo, $profile_id);
-    // $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
-    // $stmt ->execute(array(':prof' => $profile_id ));
-    // $positions = $stmt->fetchAll$positions;
-    // $education = array();
-    // $row = $stmt->fetch(PDO::FETCH_ASSOC); 
-    // while  ($education = $stmt->fetch         (PDO::FETCH_ASSOC))  {
-    //     $education[] = $row;
-    // }
-    // return $education;
 
+
+// Load up education:
     $stmt = $pdo->prepare("SELECT * FROM Education join Institution on Education.institution_id = Institution.institution_id where profile_id = :prof ORDER BY rank");
     $stmt->execute(array(":prof" => $_REQUEST["profile_id"]));
     $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // echo ($_REQUEST["profile_id"]);   // Works
+    echo "Education1: ";    echo " ### ";  /////////////////////////////////////
+    var_dump($education);
 
-    // var_dump($education);
+    if ($education === false) {
+        echo "<p style = 'color:red'>Edication NOT loade.</p>\n";
+    } else { 
+        echo "<p style = 'color:green'>Edication loaded.</p>\n";
+        echo "Education2: ";    echo " ### ";     ///////////////////////////////////////////////
+        var_dump($education);
+        // $_SESSION['error'] = 'Bad value for user_id in Education';
+        // header('Location: index.php');
+        // return;
+    }
 
+// Load up positions
+    // $stmt = $pdo->prepare("SELECT * FROM Position where profile_id = :xyz ORDER BY rank");
+    // $stmt->execute(array(":xyz" => $_GET['profile_id']));    // $profile['profile_id']));
+    
+    // $positions = $stmt->fetchAll();  //row
+    // // echo $profile['profile_id'];
+    // echo "Positions2"; echo " ### "; var_dump($positions);     ////////////////////////////////////
 
-    // if ($education === false) {
-    //     $_SESSION['error'] = 'Bad value for user_id in Education';
-    //     header('Location: index.php');
-    //     return;
-    // }
+     // Load up the position rows to be used for the other pages
+     $positions = loadPos($pdo, $_REQUEST['profile_id']);
+     echo "positions"; echo " ### ";  var_dump($positions);  ///////////////////////////////////// 
 
+    if ($positions === false) {
+        echo "<p style = 'color:red'>Position NOT loaded.</p>\n";
+        $_SESSION['error'] = 'Bad value for user_id in Position';
+        header('Location: index.php');
+        return;
+    } else {
+        echo "<p style = 'color:green'>Positions loaded for other pages.</p>\n";
+        echo "Positions1"; echo " ### "; var_dump($positions); /// => NULL ///////////////////////
+    }
+   
+
+  //Chuck: Load up  -- Working
+    $stmt = $pdo->prepare("SELECT * FROM Profile WHERE profile_id = :prof");
+    $stmt->execute(array(':prof' => $_REQUEST['profile_id']
+        ));
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo "profile"; echo " ### "; 
+    var_dump($profile);  // returned: array(7) { ["profile_id"]=> string(2) "85" ["user_id"]=> string(1) "1" ["first_name"]=> string(1) "a" ["last_name"]=> string(1) "v" ["email"]=> string(2) "c@" ["headline"]=> string(1) "d" ["summary"]=> string(8) "dafggfd " }
+
+    if ($profile === false) {
+        $_SESSION['error'] = 'Could not load profile';
+        echo "<p style = 'color:red'>Profile NOT loaded.</p>\n";
+        header('Location: index.php');
+        return;
+        } else {
+            echo "<p style = 'color:green'>Profile loaded.</p>\n";
+        }
+// // /// Clear out the old education entries--replace, instead of edit     
+// $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
+// $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+
+// // /// Clear out the old position entries--replace, instead of edit     
+$stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+$stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+
+// // /// Remove profile entries: 
+// $stmt = $pdo->prepare('DELETE FROM Profile WHERE user_id=:uid');
+// $stmt->execute(array(':uid' => "1"));
 ?>
 
 <!DOCTYPE html>
@@ -258,15 +290,15 @@
     ?>
     <form method="post">
         <p>First Name:
-            <input type="text" name="first_name" size="60" value="<?=  $row['first_name'] ?>"/></p>
+            <input type="text" name="first_name" size="60" value="<?=  $profile['first_name'] ?>"/></p>
         <p>Last Name:
-            <input type="text" name="last_name" size="60" value="<?=  $row['last_name'] ?>"/></p>
+            <input type="text" name="last_name" size="60" value="<?=  $profile['last_name'] ?>"/></p>
         <p>Email:
-            <input type="text" name="email" size="30" value="<?=  $row['email'] ?>"/></p>
+            <input type="text" name="email" size="30" value="<?=  $profile['email'] ?>"/></p>
         <p>Headline:<br/>
-            <input type="text" name="headline" size="80" value="<?=  $row['headline'] ?>"/></p>
+            <input type="text" name="headline" size="80" value="<?=  $profile['headline'] ?>"/></p>
         <p>Summary:<br/>
-            <textarea name="summary" rows="8" cols="80"><?= $row['summary'] ?></textarea>
+            <textarea name="summary" rows="8" cols="80"><?= $profile['summary'] ?></textarea>
         </p> 
 <!--Begin-Ed  -->
         <p>  Education: <input type="submit" id="addEds" value="+">

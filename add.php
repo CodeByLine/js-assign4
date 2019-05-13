@@ -5,11 +5,10 @@
   require_once "util.php";
   require_once "head.php";
 
-      if(!isset($_SESSION)) 
-      { 
-          session_start(); 
-      } 
-
+    if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+    } 
 
     if (! isset($_SESSION['user_id'])) {
       die("ACCESS DENIED");
@@ -36,31 +35,30 @@
           return;
         }
 
-        // Data validation code: moved to util.php
+        $msg = validatePos();
+        if (is_string($msg)) {
+          $_SESSION['error'] = $msg;
+          header("Location: add.php");
+          return;
+        }
 
 
-    if ( strlen($_POST['first_name']) < 1 || strlen($_POST['last_name']) < 1 || strlen($_POST['email']) < 1 || strlen($_POST['headline']) < 1 || strlen($_POST['summary']) < 1) {
+        // Validate position entries if present
+// If a string is returned, then it's an error.
 
-        $_SESSION['error'] = "<p style = 'color:red'>All values are required.</p>\n";
-        $_SESSION['message'] = "<p style = 'color:red'>All values are required.</p>\n";
-        error_log("All values are required.", 0);
-        header("Location: add.php");
-        return;
-    } elseif (strpos($_POST['email'], '@') == false) {
-      $_SESSION['error'] = 'Email must have an at-sign';
-      $_SESSION['message'] = "<p style = 'color:red'>Email must have an at-sign.</p>\n";
-      header("Location: add.php");
-      return;
+      // $    $msg = validateEds();    //Doesn't work!!!
+      // if (is_string($msg)) {
+      //     $_SESSION['error'] = $msg;
+      //     header("Location: add.php");
+      // }
 
-    } else { 
-
-
+// Profile validation code: moved to util.php
       
 // Data is valid – time to insert
 // insert profile info
 
     $stmt = $pdo->prepare('INSERT INTO Profile
-    (user_id, first_name, last_name, email, headline, summary)
+        (user_id, first_name, last_name, email, headline, summary)
     VALUES ( :uid, :fn, :ln, :em, :he, :su)'); 
     $stmt->execute(array(
       ':uid' => $_SESSION['user_id'],
@@ -71,124 +69,105 @@
       ':su' => $_POST['summary'])
       );
     $profile_id = $pdo->lastInsertId();
+      print_r($profile_id);
 
+    
 
-/////////////////// BEGIN insert school 
-for($i=1; $i<=9; $i++) {
-  if ( ! isset($_POST['edyear'.$i])) continue;
-  if ( ! isset($_POST['school'.$i])) continue;
-  $year = $_POST['edyear'.$i];
-  $school = $_POST['school'.$i];
-  if ( strlen($year) == 0 || strlen($school) == 0 ) {
-      return "All fields are requred";
-  }
-  if ( ! is_numeric($year)) {
-      $_SESSION['message'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
-      $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
-      header("Location: add.php");
-      return;
-  }
-return true;
-}
-  
-
-      // Validate position entries if present
-// If a string is returned, then it's an error.
-   
-      $msg = validatePos();
+    //  print_r($profile_id);
+      //Insert the position entries
+      $msg = insertPos($pdo, $profile_id); //$_REQUEST['profile_id']);// 
       if (is_string($msg)) {
         $_SESSION['error'] = $msg;
         header("Location: add.php");
         return;
+      } else {
+        $_SESSION['success'] = 'Record updated';
+        $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
+            header('Location: index.php');
+            return;
+        
       }
 
+  	//Insert Position entry
+// 		$rank = 1;
+// 		for($i=1; $i<=9; $i++) {
+//     if ( ! isset($_POST['year'.$i]) ) continue;
+//     if ( ! isset($_POST['desc'.$i]) ) continue;
 
-      // $    $msg = validateEds();    //Doesn't work!!!
-      // if (is_string($msg)) {
-      //     $_SESSION['error'] = $msg;
-      //     header("Location: add.php");
-      // }
+//     $year = $_POST['year'.$i];
+//     $desc = $_POST['desc'.$i];
+//     $stmt = $pdo->prepare('INSERT INTO Position
+//       (profile_id, rank, year, description)
+//       VALUES ( :pid, :rank, :year, :desc)');
 
+//     $stmt->execute(array(
+//     ':pid' => $profile_id,
+//     ':rank' => $rank,
+//     ':year' => $year,
+//     ':desc' => $desc)
+//     );
+
+//     $rank++;
+
+// }
+
+
+/////////////////// BEGIN insert school 
     $rank = 1;
     for($i=1; $i<=9; $i++) {
-      if ( ! isset($_POST['year'.$i]) ) continue;
-      if ( ! isset($_POST['school'.$i]) ) continue;
-      $year = $_POST['year'.$i];
-      $school = $_POST['school'.$i];
-
-      if ( ! is_numeric($year)) {
-        $_SESSION['error'] = "<p style = 'color:red'>Year must be numeric.</p>\n";
-        $_SESSION['message'] = "<p style = 'color:red'>Year must be numeric</p>\n";
-      }
-      }
-
-      $stmt = $pdo->prepare('SELECT name FROM Institution WHERE name LIKE :prefix');
-      $stmt->execute(array( ':prefix' => $_REQUEST['school']."%"));
-      $retval = array();
-      while ( $row = $stmt->fetch(PDO::FETCH_ASSOC) ) {
-      $retval[] = $row['name'];
-          }
-      echo(json_encode($retval, JSON_PRETTY_PRINT));
-        // }
-
-     $stmt = $pdo->prepare('INSERT INTO Education (profile_id, rank, year, institution_id) VALUES ( :pid, :rank, :year, :inst_id)');
-
-      $stmt->execute(array(
-        ':pid' => $profile_id, 
-    //$profile_id: foreign key
-        ':rank' => $rank,
-        ':year' => $year,
-        ':inst_id' => $_REQUEST['institution_id'])
-      );
-      $rank++;
-     
-
-    $msg = insertEds($pdo, $profile_id);
-    if (is_string($msg)) {
-      $_SESSION['error'] = $msg;
-      header("Location: add.php");
-      return;
-    }
-/////////////// END inser education
+      if ( ! isset($_POST['year'.$i])) continue;
+      if ( ! isset($_POST['school'.$i])) continue;
+          $year = htmlentities($_POST['year'.$i]);
+          $school = htmlentities($_POST['school'.$i]);
 
 
-//Insert the position entries
-    $msg = insertPos($pdo, $_REQUEST['profile_id']);
-    if (is_string($msg)) {
-      $_SESSION['error'] = $msg;
-      header("Location: add.php");
-      return;
-    }
+    $stmt = $pdo->prepare("SELECT * FROM Institution WHERE name = :xyz");
+    $stmt->execute(array(":xyz" => $profile_id)); //$_REQUEST["profile_id"]));
+    // var_dump ($institution_id);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+            $institution_id = $row['institution_id'];
 
-//Insert the position entries
-//     $rank = 1;
-//     for($i=1; $i<=9; $i++) {
-//       if ( ! isset($_POST['year'.$i]) ) continue;
-//       if ( ! isset($_POST['desc'.$i]) ) continue;
-//       $year = $_POST['year'.$i];
-//       $desc = $_POST['desc'.$i];
-
-//       $stmt = $pdo->prepare('INSERT INTO Position (profile_id, rank, year, description) VALUES ( :pid, :rank, :year, :desc)');
-
-//       $stmt->execute(array(
-//         ':pid' => $profile_id, 
-//         // ':pid' => $_REQUEST['profile_id'],  //$profile_id: foreign key
-// // new add
-//         ':rank' => $rank,
-//         ':year' => $year,
-//         ':desc' => $desc)
-//       );
-//     $rank++;
-//      }
+    // $stmt->execute(array(":prof" => $_REQUEST["profile_id"]));
+    // $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+      // print_r($institution_id);  /
+    }
+
+
+      
+  }
+
     $_SESSION['success'] = "<p style = 'color:green'>Profile added.</ p>\n";
     $_SESSION['message'] = "<p style = 'color:green'>Profile added.</ p>\n";
     error_log("Profile added.", 0);
     header( 'Location: index.php' ) ;
     return;
-  }
-}
+ 
+    
+    
+ 
+    //  $stmt = $pdo->prepare('INSERT INTO Institution (name) VALUES (:name)');
 
+    //   $stmt->execute(array(
+    //     '$institution_id' => $pdo->lastInsertId() ));
+      
+      // $rank++;
+      // var_dump($stmt); 
+
+    }
+    // $msg = insertEds($pdo, $profile_id);
+    // if (is_string($msg)) {
+    //   $_SESSION['error'] = $msg;
+    //   header("Location: add.php");
+    //   return;
+    // }
+/////////////// END inser education
+
+
+
+// }
+      
 ?>
 
 
@@ -216,15 +195,21 @@ return true;
 </style>
 
     <div class="container">
-
     <h1>Add Profile for <?= htmlentities($_SESSION['name']); ?></h1>
 
     <?php
-  // Flash pattern
-      if ( isset($_SESSION['error']) ) {
-        echo '<p style="color:red">'.$_SESSION['error']."</p>\n";
-        unset($_SESSION['error']);
+
+        flashMessages();
+
+      if ( isset($_SESSION['message']) ) {
+        echo $_SESSION['message']."</p>\n";
+        unset($_SESSION['message']);
       }
+  // // Flash pattern
+  //     if ( isset($_SESSION['error']) ) {
+  //       echo '<p style="color:red">'.$_SESSION['error']."</p>\n";
+  //       unset($_SESSION['error']);
+  //     }
     ?>
 
       <form method="post">
@@ -267,22 +252,20 @@ return true;
                     alert("Maximum of nine education entries exceeded");
                     return;
                 }
-                countEds++;
-                window.console && console.log("Adding institutions " + countEds);
-                $('#eds_fields').append(
+            countEds++;
+            window.console && console.log("Adding institutions " + countEds);
+            $('#eds_fields').append(
                     '<div id="eds' + countEds + '"> \
-            <p>Year: <input type="text" name="edyear' + countEds + '" value="" /> \
+            <p>Year: <input type="text" name="year' + countEds + '" value="" /> \
             <input type="button" value="-" onclick="$(\'#eds' + countEds + '\').remove();return false;"><br>\
             <p>School: <input type="text" size="80" id="school" name="school' + countEds + '" class="school" value=""/>\
             </p></div>'
                 );
-                $('.school').autocomplete({
+            $('.school').autocomplete({
                     source: "school.php"
                 });
             });
 
-
-            // countPos = 0;
 // http://stackoverflow.com/questions/17650776/add-remove-html-inside-div-using-javascript
     // $(document).ready(function () {
     //   window.console && console.log('Document ready called');
@@ -307,8 +290,6 @@ return true;
   });
     
   </script>
-
 </div>
-
 </body>
 </html>

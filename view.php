@@ -27,7 +27,7 @@
     
     $sql = ("SELECT * FROM Profile WHERE profile_id = :xyz"); 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(array(":xyz" => $_GET['profile_id']));    //MUST BE 'GET' here
+    $stmt->execute(array(":xyz" => $_REQUEST['profile_id']));    //MUST BE 'GET' here
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
     $profile_id = $row['profile_id'];
@@ -48,21 +48,21 @@
     $stmt = $pdo->prepare($sql);
     $stmt->execute(array(
       ':xyz' => $profile_id));   // $_GET['profile_id']));
-    $position = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    // echo "<p><strong>";
-    // echo ("Positions: </strong>");
-   
-    // var_dump($position); 
-    // print_r($profile_id);
-    // // echo "<p>" . "Positions: " . "</p>";
-   
-    // echo ($position['year']. "\n");
-    // echo "</p><strong>";
-    // echo ("Description: </strong>");
-    // echo ($position['description']);
+    // $position = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    echo "<p><strong>";
+        echo ("Positions: </strong>");
+    
+        var_dump($position); echo "###";
+        print_r($profile_id); echo "###";
+        // echo "<p>" . "Positions: " . "</p>";
+    
+        echo ($position['year']. "\n");
+        echo "</p><strong>";
+        echo ("Description: </strong>");
+        echo ($position['description']);
 
-    // }
+    }
  ////
     // $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
     // $stmt ->execute(array(':prof' => $profile_id ));
