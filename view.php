@@ -50,19 +50,21 @@
       ':xyz' => $profile_id));   // $_GET['profile_id']));
     // $position = $stmt->fetchAll(PDO::FETCH_ASSOC);
     while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    echo "<p><strong>";
-        echo ("Positions: </strong>");
-    
-        var_dump($position); echo "###";
-        print_r($profile_id); echo "###";
-        // echo "<p>" . "Positions: " . "</p>";
-    
-        echo ($position['year']. "\n");
-        echo "</p><strong>";
-        echo ("Description: </strong>");
-        echo ($position['description']);
-
+        $yr= $position['year'];
+        $des=$position['description'];
+    // echo "<p><strong>";
+    // echo ("Positions: </strong>");
+    // foreach ((array) $positions as $pos) {
+    //     echo('<li>'.$pos['year'].'</li>');
+    //     echo('<li>'.$pos['description'].'</li>');
     }
+
+    
+        // var_dump($position); echo "###";
+        // print_r($profile_id); echo "###";
+        // echo "<p>" . "Positions: " . "</p>";
+
+    // }
  ////
     // $stmt = $pdo->prepare('SELECT * FROM Education WHERE profile_id = :prof ORDER BY rank');
     // $stmt ->execute(array(':prof' => $profile_id ));
@@ -94,11 +96,14 @@
     }
 
     
-    echo ("<strong>Position: </strong>");
+    echo ("<strong>Positionooo: </strong>");
 
     foreach ((array) $position as $pos) {
-        echo('<li>'.$pos['year'].'</li>');
-        echo('<li>'.$pos['description'].'</li>');
+        echo('<li>'.$yr.'</li>');
+        echo('<li>'.$des.'</li>');
+
+        // echo('<li>'.$position['year'].'</li>');
+        // echo('<li>'.$position['description'].'</li>');
     }
     
 ////// BEGIN: View All

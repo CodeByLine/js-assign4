@@ -97,7 +97,7 @@
         last_name = :ln,email=:em, headline=:he, summary=:su
         WHERE profile_id = :pid AND user_id=:uid');
     $stmt->execute(array(
-        ':pid' => $_REQUEST['profile_id'],
+        ':pid' => $profile_id,   // $_REQUEST['profile_id'],
         ':uid' => $_SESSION['user_id'],  //NOT $_REQUEST['user_id']
         ':fn' => $_POST['first_name'],
         ':ln' => $_POST['last_name'],
@@ -112,9 +112,10 @@
 
 
 // Insert position entries
+
     // print_r($profile_id); echo "*******";
     // echo $_REQUEST['profile_id'];
-    //$msg = insertPos($pdo, $profile_id); //$_REQUEST['profile_id']);
+    // $msg = insertPos($pdo, $profile_id); //$_REQUEST['profile_id']);
 
     // echo "$profile_id";
     // if (is_string($msg)) {
@@ -131,28 +132,28 @@
     // }
 
 
-    // Insert position entries
-    $rank = 1;
-    for($i=1; $i<=9; $i++) {
-        if ( ! isset($_POST['year'.$i]) ) continue;
-        if ( ! isset($_POST['desc'.$i]) ) continue;
+//Insert Position entry
+		$rank = 1;
+		for($i=1; $i<=9; $i++) {
+  if ( ! isset($_POST['year'.$i]) ) continue;
+  if ( ! isset($_POST['desc'.$i]) ) continue;
 
-    $year = $_POST['year'.$i];
-    $desc = $_POST['desc'.$i];
-    $stmt = $pdo->prepare('INSERT INTO Position
-        (profile_id, rank, year, description)
-        VALUES ( :pid, :rank, :year, :desc)');
+	$year = $_POST['year'.$i];
+	$desc = $_POST['desc'.$i];
+	$stmt = $pdo->prepare('INSERT INTO Position
+    (profile_id, rank, year, description)
+    VALUES ( :pid, :rank, :year, :desc)');
 
-    $stmt->execute(array(
-        ':pid' => $profile_id,
-        ':rank' => $rank,
-        ':year' => $year,
-        ':desc' => $desc)
-    );
+  $stmt->execute(array(
+  ':pid' => $_GET['profile_id'],
+  ':rank' => $rank,
+  ':year' => $year,
+  ':desc' => $desc)
+  );
 
-    $rank++;
+  $rank++;
 
-    }
+}
 
 
     //Insert education
@@ -181,10 +182,7 @@
     }
 
 
-
 }     /////  The First Major "if" statement//Chuck: Load up
-
-
 
 
 // Load up education:
@@ -233,11 +231,11 @@
     $stmt = $pdo->prepare("SELECT * FROM Profile WHERE profile_id = :prof");
     $stmt->execute(array(':prof' => $_REQUEST['profile_id']
         ));
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo "profile"; echo " ### "; 
-    var_dump($profile);  // returned: array(7) { ["profile_id"]=> string(2) "85" ["user_id"]=> string(1) "1" ["first_name"]=> string(1) "a" ["last_name"]=> string(1) "v" ["email"]=> string(2) "c@" ["headline"]=> string(1) "d" ["summary"]=> string(8) "dafggfd " }
+    $profiles = $stmt->fetch(PDO::FETCH_ASSOC);
+    // echo "profile"; echo " ### "; 
+    // var_dump($profile);  // returned: array(7) { ["profile_id"]=> string(2) "85" ["user_id"]=> string(1) "1" ["first_name"]=> string(1) "a" ["last_name"]=> string(1) "v" ["email"]=> string(2) "c@" ["headline"]=> string(1) "d" ["summary"]=> string(8) "dafggfd " }
 
-    if ($profile === false) {
+    if ($profiles === false) {
         $_SESSION['error'] = 'Could not load profile';
         echo "<p style = 'color:red'>Profile NOT loaded.</p>\n";
         header('Location: index.php');
@@ -245,15 +243,17 @@
         } else {
             echo "<p style = 'color:green'>Profile loaded.</p>\n";
         }
-// // /// Clear out the old education entries--replace, instead of edit     
+// // /// Clear out the old education entries--replace, instead of edit   
+
 // $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
 // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Clear out the old position entries--replace, instead of edit     
-$stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-$stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Remove profile entries: 
+
 // $stmt = $pdo->prepare('DELETE FROM Profile WHERE user_id=:uid');
 // $stmt->execute(array(':uid' => "1"));
 ?>
@@ -290,15 +290,15 @@ $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
     ?>
     <form method="post">
         <p>First Name:
-            <input type="text" name="first_name" size="60" value="<?=  $profile['first_name'] ?>"/></p>
+            <input type="text" name="first_name" size="60" value="<?=  $profiles['first_name'] ?>"/></p>
         <p>Last Name:
-            <input type="text" name="last_name" size="60" value="<?=  $profile['last_name'] ?>"/></p>
+            <input type="text" name="last_name" size="60" value="<?=  $profiles['last_name'] ?>"/></p>
         <p>Email:
-            <input type="text" name="email" size="30" value="<?=  $profile['email'] ?>"/></p>
+            <input type="text" name="email" size="30" value="<?=  $profiles['email'] ?>"/></p>
         <p>Headline:<br/>
-            <input type="text" name="headline" size="80" value="<?=  $profile['headline'] ?>"/></p>
+            <input type="text" name="headline" size="80" value="<?=  $profiles['headline'] ?>"/></p>
         <p>Summary:<br/>
-            <textarea name="summary" rows="8" cols="80"><?= $profile['summary'] ?></textarea>
+            <textarea name="summary" rows="8" cols="80"><?= $profiles['summary'] ?></textarea>
         </p> 
 <!--Begin-Ed  -->
         <p>  Education: <input type="submit" id="addEds" value="+">
