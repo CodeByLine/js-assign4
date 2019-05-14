@@ -111,49 +111,29 @@
     return;
 
 
-// Insert position entries
-
-    // print_r($profile_id); echo "*******";
-    // echo $_REQUEST['profile_id'];
-    // $msg = insertPos($pdo, $profile_id); //$_REQUEST['profile_id']);
-
-    // echo "$profile_id";
-    // if (is_string($msg)) {
-
-    //     $_SESSION['error'] = $msg;
-    //     header("Location: edit.php?profile_id=" . $profile_id); // $_REQUEST["profile_id"]); // 
-    //     return "Position error";
-    // } 
-        
-    //     $_SESSION['success'] = 'Record updated';
-    //     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
-    //     header('Location: view.php');
-    //     return;
-    // }
-
 
 //Insert Position entry
-		$rank = 1;
-		for($i=1; $i<=9; $i++) {
-  if ( ! isset($_POST['year'.$i]) ) continue;
-  if ( ! isset($_POST['desc'.$i]) ) continue;
+	$rank = 1;
+    for($i=1; $i<=9; $i++) {
+    if ( ! isset($_POST['year'.$i]) ) continue;
+    if ( ! isset($_POST['desc'.$i]) ) continue;
 
-	$year = $_POST['year'.$i];
-	$desc = $_POST['desc'.$i];
-	$stmt = $pdo->prepare('INSERT INTO Position
-    (profile_id, rank, year, description)
-    VALUES ( :pid, :rank, :year, :desc)');
+        $year = $_POST['year'.$i];
+        $desc = $_POST['desc'.$i];
+        $stmt = $pdo->prepare('INSERT INTO Position
+        (profile_id, rank, year, description)
+        VALUES ( :pid, :rank, :year, :desc)');
 
-  $stmt->execute(array(
-  ':pid' => $_GET['profile_id'],
-  ':rank' => $rank,
-  ':year' => $year,
-  ':desc' => $desc)
-  );
+    $stmt->execute(array(
+        ':pid' => $profile_id, // $_GET['profile_id'],
+        ':rank' => $rank,
+        ':year' => $year,
+        ':desc' => $desc)
+        );
 
-  $rank++;
+    $rank++;
 
-}
+    }
 
 
     //Insert education
@@ -249,8 +229,8 @@
 // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Clear out the old position entries--replace, instead of edit     
-    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+    // $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Remove profile entries: 
 
