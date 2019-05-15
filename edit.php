@@ -66,6 +66,7 @@ if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['
     }
 
 
+
     // $msg = validateEds();
     // if ( is_string($msg)) {
     //     $_SESSION['error'] = $msg;
