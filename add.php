@@ -88,7 +88,7 @@
         
       }
 
-  	//Insert Position entry
+  	//Insert Position entry--code below works!
 // 		$rank = 1;
 // 		for($i=1; $i<=9; $i++) {
 //     if ( ! isset($_POST['year'.$i]) ) continue;

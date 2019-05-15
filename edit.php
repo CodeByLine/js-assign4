@@ -43,13 +43,16 @@
 
 // Chuck: Handle the incoming data
 
+if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['email']) && isset($_POST['headline']) && isset($_POST['summary']) ) {
+
   if ( isset($_POST['first_name']) && isset($_POST['last_name'])
     && isset($_POST['email']) && isset($_POST['headline']) && isset($_POST['summary'])) {
 
     $msg = validateProfile();
     if ( is_string($msg)) {
         $_SESSION['error'] = $msg;
-        header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]);   
+        header("Location: edit.php?profile_id=" . $_REQUEST["profile_id"]); 
+        $profile_id = $_REQUEST["profile_id"];
         // line above differs fr add.php; need the param for later
         return;
     }
@@ -89,7 +92,8 @@
         }
     return true; 
     }
-
+// echo $profile_id;
+// print_r($profile_id);
 
 
 //Update profile
@@ -97,7 +101,7 @@
         last_name = :ln,email=:em, headline=:he, summary=:su
         WHERE profile_id = :pid AND user_id=:uid');
     $stmt->execute(array(
-        ':pid' => $profile_id,   // $_REQUEST['profile_id'],
+        ':pid' => $_REQUEST['profile_id'], //$profile_id,   // 
         ':uid' => $_SESSION['user_id'],  //NOT $_REQUEST['user_id']
         ':fn' => $_POST['first_name'],
         ':ln' => $_POST['last_name'],
@@ -111,29 +115,45 @@
     return;
 
 
+      //Insert the position entries
+    //   $msg = insertPos($pdo, $_REQUEST['profile_id']);// $profile_id); //
+      
+    //   if (is_string($msg)) {
+    //     $_SESSION['error'] = $msg;
+    //     header("Location: edit.php");
+    //     return;
+    //   } else {
+    //     $_SESSION['success'] = 'Record updated';
+    //     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
+    //         header('Location: view.php');
+    //         return;
+        
+    //   }
+      
+// Insert Position entry
 
-//Insert Position entry
-	$rank = 1;
+    $rank = 1;
     for($i=1; $i<=9; $i++) {
     if ( ! isset($_POST['year'.$i]) ) continue;
     if ( ! isset($_POST['desc'.$i]) ) continue;
 
-        $year = $_POST['year'.$i];
-        $desc = $_POST['desc'.$i];
-        $stmt = $pdo->prepare('INSERT INTO Position
-        (profile_id, rank, year, description)
-        VALUES ( :pid, :rank, :year, :desc)');
+    $year = $_POST['year'.$i];
+    $desc = $_POST['desc'.$i];
+    $stmt = $pdo->prepare('INSERT INTO Position
+    (profile_id, rank, year, description)
+    VALUES ( :pid, :rank, :year, :desc)');
 
     $stmt->execute(array(
-        ':pid' => $profile_id, // $_GET['profile_id'],
-        ':rank' => $rank,
-        ':year' => $year,
-        ':desc' => $desc)
-        );
+    ':pid' => $_REQUEST['profile_id'],  // $profile_id,   //
+    ':rank' => $rank,
+    ':year' => $year,
+    ':desc' => $desc)
+    );
 
     $rank++;
 
     }
+    
 
 
     //Insert education
@@ -160,7 +180,7 @@
       return;
         }
     }
-
+    }
 
 }     /////  The First Major "if" statement//Chuck: Load up
 
@@ -194,7 +214,7 @@
 
      // Load up the position rows to be used for the other pages
      $positions = loadPos($pdo, $_REQUEST['profile_id']);
-     echo "positions"; echo " ### ";  var_dump($positions);  ///////////////////////////////////// 
+    // echo "positions"; echo " ### ";  var_dump($positions);  ///////////////////////////////////// 
 
     if ($positions === false) {
         echo "<p style = 'color:red'>Position NOT loaded.</p>\n";
@@ -203,9 +223,9 @@
         return;
     } else {
         echo "<p style = 'color:green'>Positions loaded for other pages.</p>\n";
-        echo "Positions1"; echo " ### "; var_dump($positions); /// => NULL ///////////////////////
+        echo "Positions1"; echo " ### "; //var_dump($positions); /// => NULL ///////////////////////
     }
-   
+    var_dump($positions);
 
   //Chuck: Load up  -- Working
     $stmt = $pdo->prepare("SELECT * FROM Profile WHERE profile_id = :prof");
@@ -305,7 +325,7 @@
         <div id="position_fields">
             <?php
             $rank = 1;
-            foreach ((array) $positions as $row) {
+            foreach ((array) $position as $row) {
                 echo "<div id=\"position" . $rank . "\">
         <p>Year: <input type=\"text\" name=\"year1\" value=\"".$row['year']."\">
         <input type=\"button\" value=\"-\" onclick=\"$('#position" . $rank . "').remove();return false;\"></p>

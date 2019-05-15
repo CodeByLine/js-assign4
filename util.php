@@ -100,8 +100,9 @@ function loadPos($pdo, $profile_id) {
         $positions[] = $row;
     }
     return $positions;
+    // var_dump($positions);
     }
-
+// var_dump($positions);
 
 /////////////////// BEGIN insert school 
 function insertEds($pdo, $profile_id) { 
