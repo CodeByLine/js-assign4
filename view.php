@@ -99,14 +99,11 @@
     }
 
     
-    echo ("<strong>Positionooo: </strong>");
+    echo ("<strong>Position: </strong>");
 
     foreach ((array) $position as $pos) {
-        echo('<li>'.$yr.'</li>');
-        echo('<li>'.$des.'</li>');
-
-        // echo('<li>'.$position['year'].'</li>');
-        // echo('<li>'.$position['description'].'</li>');
+        echo('<li>'."Year: " .$yr.'</li>');
+        echo('<li>'."Description: " . $des.'</li>');
     }
     
 ////// BEGIN: View All
