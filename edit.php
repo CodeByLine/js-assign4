@@ -109,52 +109,27 @@ if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['
         ':he' => $_POST['headline'],
         ':su' => $_POST['summary'] ) );
 
-    $_SESSION['success'] = 'Record updated';
-    $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
-    header("Location: view.php");
-    return;
+    // $_SESSION['success'] = 'Record updated';
+    // $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
+    // header("Location: view.php");
+    // return;   //Breaks the code
 
 
       //Insert the position entries
-    //   $msg = insertPos($pdo, $_REQUEST['profile_id']);// $profile_id); //
+      $msg = insertPos($pdo, $_REQUEST['profile_id']);// $profile_id); //
       
-    //   if (is_string($msg)) {
-    //     $_SESSION['error'] = $msg;
-    //     header("Location: edit.php");
-    //     return;
-    //   } else {
-    //     $_SESSION['success'] = 'Record updated';
-    //     $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
-    //         header('Location: view.php');
-    //         return;
-        
-    //   }
-      
-// Insert Position entry
+      if (is_string($msg)) {
+        $_SESSION['error'] = $msg;
+        header("Location: edit.php");
+        return;
+      } else {
+        $_SESSION['success'] = 'Record updated';
+        $_SESSION['message'] = "<p style = 'color:green'>Record updated.</p>\n";
+            header('Location: view.php');
+            return;      
+      }
 
-    $rank = 1;
-    for($i=1; $i<=9; $i++) {
-    if ( ! isset($_POST['year'.$i]) ) continue;
-    if ( ! isset($_POST['desc'.$i]) ) continue;
-
-    $year = $_POST['year'.$i];
-    $desc = $_POST['desc'.$i];
-    $stmt = $pdo->prepare('INSERT INTO Position
-    (profile_id, rank, year, description)
-    VALUES ( :pid, :rank, :year, :desc)');
-
-    $stmt->execute(array(
-    ':pid' => $_REQUEST['profile_id'],  // $profile_id,   //
-    ':rank' => $rank,
-    ':year' => $year,
-    ':desc' => $desc)
-    );
-
-    $rank++;
-
-    }
     
-
 
     //Insert education
     $rank = 1;
@@ -190,32 +165,31 @@ if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['
     $stmt->execute(array(":prof" => $_REQUEST["profile_id"]));
     $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
     // echo ($_REQUEST["profile_id"]);   // Works
-    echo "Education1: ";    echo " ### ";  /////////////////////////////////////
-    var_dump($education);
+ //   echo "Education1: ";    echo " ### ";  /////////////////////////////////////
+ //   var_dump($education);
 
     if ($education === false) {
         echo "<p style = 'color:red'>Edication NOT loade.</p>\n";
     } else { 
         echo "<p style = 'color:green'>Edication loaded.</p>\n";
-        echo "Education2: ";    echo " ### ";     ///////////////////////////////////////////////
-        var_dump($education);
+ //       echo "Education2: ";    echo " ### ";     ///////////////////////////////////////////////
+  //      var_dump($education);
         // $_SESSION['error'] = 'Bad value for user_id in Education';
         // header('Location: index.php');
         // return;
     }
 
 // Load up positions
-    // $stmt = $pdo->prepare("SELECT * FROM Position where profile_id = :xyz ORDER BY rank");
-    // $stmt->execute(array(":xyz" => $_GET['profile_id']));    // $profile['profile_id']));
+    $stmt = $pdo->prepare("SELECT * FROM Position where profile_id = :xyz ORDER BY rank");
+    $stmt->execute(array(":xyz" => $_GET['profile_id']));    // $profile['profile_id']));
     
-    // $positions = $stmt->fetchAll();  //row
-    // // echo $profile['profile_id'];
-    // echo "Positions2"; echo " ### "; var_dump($positions);     ////////////////////////////////////
+    $positions = $stmt->fetchAll();  //row
+    // echo $profile['profile_id'];
+    // echo "Positions2"; echo " ### "; var_dump($positions);    //////////////////
 
-     // Load up the position rows to be used for the other pages
+     // Load up the position to be used for the other pages
      $positions = loadPos($pdo, $_REQUEST['profile_id']);
-    // echo "positions"; echo " ### ";  var_dump($positions);  ///////////////////////////////////// 
-
+    
     if ($positions === false) {
         echo "<p style = 'color:red'>Position NOT loaded.</p>\n";
         $_SESSION['error'] = 'Bad value for user_id in Position';
@@ -223,17 +197,15 @@ if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['
         return;
     } else {
         echo "<p style = 'color:green'>Positions loaded for other pages.</p>\n";
-        echo "Positions1"; echo " ### "; //var_dump($positions); /// => NULL ///////////////////////
+
     }
-    var_dump($positions);
+
 
   //Chuck: Load up  -- Working
     $stmt = $pdo->prepare("SELECT * FROM Profile WHERE profile_id = :prof");
     $stmt->execute(array(':prof' => $_REQUEST['profile_id']
         ));
     $profiles = $stmt->fetch(PDO::FETCH_ASSOC);
-    // echo "profile"; echo " ### "; 
-    // var_dump($profile);  // returned: array(7) { ["profile_id"]=> string(2) "85" ["user_id"]=> string(1) "1" ["first_name"]=> string(1) "a" ["last_name"]=> string(1) "v" ["email"]=> string(2) "c@" ["headline"]=> string(1) "d" ["summary"]=> string(8) "dafggfd " }
 
     if ($profiles === false) {
         $_SESSION['error'] = 'Could not load profile';
@@ -245,12 +217,12 @@ if ( isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['
         }
 // // /// Clear out the old education entries--replace, instead of edit   
 
-// $stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
-// $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+$stmt = $pdo->prepare('DELETE FROM Education WHERE profile_id=:pid');
+$stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Clear out the old position entries--replace, instead of edit     
-    // $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
-    // $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
+    $stmt = $pdo->prepare('DELETE FROM Position WHERE profile_id=:pid');
+    $stmt->execute(array(':pid' => $_REQUEST['profile_id']));
 
 // // /// Remove profile entries: 
 

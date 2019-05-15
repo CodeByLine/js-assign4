@@ -11,18 +11,25 @@
     { 
         session_start(); 
     } 
+
+    if ( ! isset($_SESSION["name"])  ) {
+        die('ACCESS DENIED');
+        }
+        
+    //Make sure that request parameter is present
+    if ( ! isset($_REQUEST['profile_id']) ) {
+        $_SESSION['error'] = 'Missing Profile_id';
+        header( 'Location: index.php' ) ;
+        return;
+    }
     
     if (!empty($_SESSION['message'])) {
         echo $_SESSION['message'];
         unset($_SESSION['message']);
       }
       
-      $errors = [];
-      $success = [];
-
-    // if (isset($_SESSION['name']) == false) {
-    //     die('Not logged in');
-    // } 
+    $errors = [];
+    $success = [];
 
     
     $sql = ("SELECT * FROM Profile WHERE profile_id = :xyz"); 
@@ -52,11 +59,7 @@
     while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $yr= $position['year'];
         $des=$position['description'];
-    // echo "<p><strong>";
-    // echo ("Positions: </strong>");
-    // foreach ((array) $positions as $pos) {
-    //     echo('<li>'.$pos['year'].'</li>');
-    //     echo('<li>'.$pos['description'].'</li>');
+
     }
 
     
