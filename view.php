@@ -75,27 +75,28 @@
     $stmt = $pdo->prepare("SELECT * FROM Education join Institution on Education.institution_id = Institution.institution_id where profile_id = :prof ORDER BY rank");
     $stmt->execute(array(":prof" => $profile_id));
     $education = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 //    var_dump($education);
 //  $edrow = $stmt->fetch(PDO::FETCH_ASSOC); 
-    // while  ($education = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    //     echo "<p><strong>";
-    //     echo ("Education: </strong></p>");
-    //     echo ("<strong>Institution_ID: </strong>");
-    //     // echo ($education['institution_id']);
-    //     echo ($education['name']);
-    //     echo "</p><strong>";
-    //     echo ("Year: </strong>");
-    //     echo ($education['year']. "\n");
+    while  ($education = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        echo "<p><strong>";
+        echo ("Education: </strong></p>");
+        echo ("<strong>Institution_ID: </strong>");
+        // echo ($education['institution_id']);
+        echo ($education['name']);
+        echo "</p><strong>";
+        echo ("Year: </strong>");
+        echo ($education['year']. "\n");
 
-    // }
+    }
     
-    echo ("<p><strong>Education / Institution: </strong></p>");
+    echo ("<strong>Education / Institution: </strong>");
     foreach ((array) $education as $row) {
         // echo('<li>'.$row['year'].':'.$row['name'].'</li>');
         // echo ("<strong>Institution: </strong>");
-        echo('<li>'.$row['name'].'</li>');
-        echo ("<strong>Year: </strong>");
-        echo('<li>'.$row['year'].'</li>');
+        echo('<li>'. "Institution: " . $row['name'].'</li>');
+        // echo ("<strong>Year: </strong>");
+        echo('<li>'. "Year: ". $row['year'].'</li>' . '<br>');
     }
 
     
