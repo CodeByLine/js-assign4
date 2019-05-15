@@ -56,12 +56,19 @@
     $stmt->execute(array(
       ':xyz' => $profile_id));   // $_GET['profile_id']));
     // $position = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // var_dump($position);
     while ($position = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $yr= $position['year'];
         $des=$position['description'];
-
+        
     }
+    echo ("<strong>Position: </strong>");
 
+    foreach ((array) $position as $pos) {
+        echo('<li>'."Year: " .$yr.'</li>');
+        echo('<li>'."Description: " . $des.'</li>');
+    }
     
         // var_dump($position); echo "###";
         // print_r($profile_id); echo "###";
@@ -100,12 +107,7 @@
     }
 
     
-    echo ("<strong>Position: </strong>");
 
-    foreach ((array) $position as $pos) {
-        echo('<li>'."Year: " .$yr.'</li>');
-        echo('<li>'."Description: " . $des.'</li>');
-    }
     
 ////// BEGIN: View All
 
